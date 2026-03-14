@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../config/router/route_names.dart';
 import '../../../../config/theme/app_text_styles.dart';
+import '../../../../core/constants/app_constants.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -55,8 +57,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
   }
 
-  void _onSkip() {
-    context.push(RouteNames.phone);
+  Future<void> _onSkip() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(AppConstants.kOnboardingComplete, true);
+    if (mounted) context.go(RouteNames.phone);
   }
 
   @override
