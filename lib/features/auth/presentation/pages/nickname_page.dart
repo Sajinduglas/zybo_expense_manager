@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../config/theme/app_colors.dart';
 import '../../../../config/router/route_names.dart';
 import '../../../../config/theme/app_text_styles.dart';
 import '../../../../di/injection.dart';
@@ -46,9 +47,9 @@ class _NicknamePageState extends State<NicknamePage> {
 
   @override
   Widget build(BuildContext context) {
-    const Color buttonColor = Color(0xFF3B38D0);
-    const Color inputBackground = Color(0xFF2A2A2A);
-    const Color background = Color(0xFF141414);
+    const Color buttonColor = AppColors.blue;
+    const Color inputBackground = AppColors.authFieldBackground;
+    const Color background = AppColors.authBackground;
 
     return BlocProvider(
       create: (context) => sl<AuthBloc>(),
@@ -74,19 +75,15 @@ class _NicknamePageState extends State<NicknamePage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 32),
-                      Text(
-                        '👋 What should we call you?',
-                        style: AppTextStyles.title.copyWith(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          '👋 What should we call you?',
+                          style: AppTextStyles.authTitle,
                         ),
-                      ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 20),
                       Text(
                         'This name stays only on your device.',
-                        style: AppTextStyles.body.copyWith(
-                          color: Colors.white.withValues(alpha: 0.7),
+                        style: AppTextStyles.authSubtitle.copyWith(
+                          color: AppColors.white.withValues(alpha: 0.8),
                         ),
                       ),
                       const SizedBox(height: 40),
@@ -101,11 +98,11 @@ class _NicknamePageState extends State<NicknamePage> {
                             Expanded(
                               child: TextField(
                                 controller: _nameController,
-                                style: AppTextStyles.body.copyWith(color: Colors.white),
+                                style: AppTextStyles.authBody15,
                                 decoration: InputDecoration(
                                   hintText: 'Eg: Johnnnie',
-                                  hintStyle: AppTextStyles.body.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.4),
+                                  hintStyle: AppTextStyles.authBody15.copyWith(
+                                    color: AppColors.white.withValues(alpha: 0.4),
                                   ),
                                   border: InputBorder.none,
                                   enabledBorder: InputBorder.none,
@@ -116,17 +113,18 @@ class _NicknamePageState extends State<NicknamePage> {
                               ),
                             ),
                             if (_isValid)
-                              const Icon(Icons.check_circle, color: Color(0xFF4CAF50)),
+                              const Icon(Icons.check_circle, color: AppColors.success),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 18),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _isValid
                               ? buttonColor
-                              : buttonColor.withValues(alpha: 0.4),
+                              : AppColors.disabledButton,
                           minimumSize: const Size(double.infinity, 56),
+                          elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         onPressed: (isLoading || !_isValid) ? null : () => _onContinue(context),
@@ -134,10 +132,16 @@ class _NicknamePageState extends State<NicknamePage> {
                             ? const SizedBox(
                                 height: 22,
                                 width: 22,
-                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2),
                               )
-                            : Text('Continue',
-                                style: AppTextStyles.button.copyWith(color: Colors.white)),
+                            : Text(
+                                'Continue',
+                                style: AppTextStyles.authButtonText.copyWith(
+                                  color: _isValid 
+                                      ? AppColors.white 
+                                      : AppColors.white.withValues(alpha: 0.3),
+                                ),
+                              ),
                       ),
                     ],
                   ),

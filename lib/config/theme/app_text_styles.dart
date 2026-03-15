@@ -85,4 +85,11 @@ class AppTextStyles {
     fontSize: 15.0,
     color: AppColors.white,
   );
+
+  static const TextStyle authButtonText = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w600,
+    fontSize: 16.0,
+    color: AppColors.white,
+  );
 }

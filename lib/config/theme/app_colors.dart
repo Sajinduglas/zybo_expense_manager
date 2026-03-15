@@ -17,7 +17,10 @@ class AppColors {
   
   static const Color border = Color(0xFFDDDDDD);
   static const Color blue = Color(0xFF312ECB);
+
   static const Color onboardingBlue = Color(0xFF3B38D0);
   static const Color authBackground = Color(0xFF141414);
   static const Color authFieldBackground = Color(0xFF2A2A2A);
+  static const Color success = Color(0xFF34FF4C);
+  static const Color disabledButton = Color(0xFF262626);
 }
