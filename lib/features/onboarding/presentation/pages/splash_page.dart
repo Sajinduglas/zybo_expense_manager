@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:zybo_expense_manager/config/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../config/router/route_names.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,7 +57,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF141414),
+      backgroundColor: AppColors.darkBackground,
       body: Center(
         child: Image.asset(
           'assets/images/logo.png',

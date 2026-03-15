@@ -10,9 +10,12 @@ class AppColors {
   static const Color background = Color(0xFFF4F6F6);
   static const Color white = Color(0xFFFFFFFF);
   static const Color black = Color(0xFF000000);
+  static const Color darkBackground = Color(0xFF121212);
 
   static const Color textPrimary = Color(0xFF222222);
   static const Color textSecondary = Color(0xFF666666);
   
   static const Color border = Color(0xFFDDDDDD);
+  static const Color blue = Color(0xFF312ECB);
+  static const Color onboardingBlue = Color(0xFF3B38D0);
 }

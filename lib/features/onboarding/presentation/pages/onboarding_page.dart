@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../config/theme/app_colors.dart';
 import '../../../../config/router/route_names.dart';
 import '../../../../config/theme/app_text_styles.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -65,9 +66,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    const Color buttonColor = Color(0xFF3B38D0);
-
     return Scaffold(
+      backgroundColor: AppColors.black,
       body: Stack(
         children: [
           // Background Image
@@ -78,22 +78,46 @@ class _OnboardingPageState extends State<OnboardingPage> {
             ),
           ),
           
+          // Gradient Overlay for "Fading to Black" look
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.black.withValues(alpha: 0.1),
+                    AppColors.black.withValues(alpha: 0.4),
+                    AppColors.black.withValues(alpha: 0.9),
+                    AppColors.black,
+                  ],
+                  stops: const [0.0, 0.3, 0.8, 1.0],
+                ),
+              ),
+            ),
+          ),
+          
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Top Skip Button
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       if (_currentPage < 2)
                         TextButton(
                           onPressed: _onSkip,
-                          child: Text(
+                          child: const Text(
                             'SKIP',
-                            style: AppTextStyles.button.copyWith(fontSize: 14),
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         )
                       else
@@ -119,43 +143,39 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Page Indicators moved here
+                            // Page Indicators
                             Row(
                               children: List.generate(_pages.length, (dotIndex) {
                                 return Expanded(
                                   child: Container(
                                     margin: EdgeInsets.only(
-                                      right: dotIndex < _pages.length - 1 ? 8.0 : 0,
+                                      right: dotIndex < _pages.length - 1 ? 12.0 : 0,
                                     ),
-                                    height: 4,
+                                    height: 2.5,
                                     decoration: BoxDecoration(
                                       color: _currentPage == dotIndex 
-                                          ? Colors.white 
-                                          : Colors.white.withOpacity(0.3),
+                                          ? AppColors.white 
+                                          : AppColors.white.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(2),
                                     ),
                                   ),
                                 );
                               }),
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 40),
                             
                             Text(
                               _pages[index]['title']!,
-                              style: AppTextStyles.title.copyWith(
-                                color: Colors.white,
-                                fontSize: 24,
-                              ),
+                              style: AppTextStyles.onboardingTitle,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
                             Text(
                               _pages[index]['subtitle']!,
-                              style: AppTextStyles.body.copyWith(
-                                color: Colors.white.withOpacity(0.8),
-                                fontSize: 14,
+                              style: AppTextStyles.onboardingBody.copyWith(
+                                color: AppColors.white.withValues(alpha: 0.6),
                               ),
                             ),
-                            const SizedBox(height: 150), // space for buttons
+                            const SizedBox(height: 140), // space for buttons
                           ],
                         ),
                       );
@@ -166,22 +186,24 @@ class _OnboardingPageState extends State<OnboardingPage> {
             ),
           ),
 
-          // Bottom Navigation Buttons overlaid
+          // Bottom Navigation Buttons
           Positioned(
             left: 24,
             right: 24,
-            bottom: 32 + MediaQuery.of(context).padding.bottom,
+            bottom: 24 + MediaQuery.of(context).padding.bottom,
             child: Row(
               children: [
                 if (_currentPage > 0) ...[
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: _onBack,
+                  GestureDetector(
+                    onTap: _onBack,
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.white.withValues(alpha: 0.5), width: 1.5),
+                      ),
+                      child: const Icon(Icons.arrow_back, color: AppColors.white, size: 24),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -189,8 +211,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: buttonColor,
+                      backgroundColor: AppColors.onboardingBlue,
+                      foregroundColor: AppColors.white,
                       minimumSize: const Size(double.infinity, 56),
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -198,8 +222,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     onPressed: _onNext,
                     child: Text(
                       _currentPage == 2 ? 'Get Started' : 'Next',
-                      style: AppTextStyles.button.copyWith(
-                        color: Colors.white,
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

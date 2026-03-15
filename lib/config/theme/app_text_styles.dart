@@ -24,8 +24,14 @@ class AppTextStyles {
   static const TextStyle body = TextStyle(
     fontFamily: fontFamily,
     fontWeight: FontWeight.w500,
-    fontSize: 16.0,
-    color: AppColors.textPrimary,
+    fontSize: 16.0, 
+    color: AppColors.textPrimary, 
+  );
+  static const TextStyle body15 = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w400,
+    fontSize: 15.0,
+    color: AppColors.textPrimary, 
   );
 
   static const TextStyle button = TextStyle(
@@ -40,5 +46,21 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
     fontSize: 13.0,
     color: AppColors.textSecondary,
+  );
+
+  static const TextStyle onboardingTitle = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.bold,
+    fontSize: 32.0,
+    color: AppColors.white,
+    height: 1.2,
+    letterSpacing: -0.5,
+  );
+
+  static const TextStyle onboardingBody = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w400,
+    fontSize: 16.0,
+    color: AppColors.white,
   );
 }
