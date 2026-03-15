@@ -38,7 +38,7 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
 
   @override
   Widget build(BuildContext context) {
-    const Color buttonColor = AppColors.onboardingBlue;
+    const Color buttonColor = AppColors.blue;
     const Color inputBackground = AppColors.authFieldBackground;
     const Color background = AppColors.authBackground;
 
