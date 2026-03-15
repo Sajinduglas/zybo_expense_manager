@@ -44,4 +44,10 @@ class DatabaseHelper {
       )
     ''');
   }
+
+  Future<void> clearAllData() async {
+    final db = await database;
+    await db.delete(DbConstants.tableTransactions);
+    await db.delete(DbConstants.tableCategories);
+  }
 }

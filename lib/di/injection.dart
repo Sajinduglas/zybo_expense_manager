@@ -19,6 +19,10 @@ import '../features/transactions/data/repositories/transaction_repository_impl.d
 import '../features/transactions/domain/repositories/transaction_repository.dart';
 import '../features/transactions/presentation/bloc/transaction_bloc.dart';
 
+import '../features/sync/data/datasources/sync_remote_datasource.dart';
+import '../features/sync/data/repositories/sync_repository.dart';
+import '../features/sync/presentation/bloc/sync_bloc.dart';
+
 final GetIt sl = GetIt.instance;
 
 Future<void> init() async {
@@ -51,7 +55,12 @@ Future<void> init() async {
   sl.registerLazySingleton(
     () => AuthRepository(remoteDatasource: sl(), prefs: sl()),
   );
-  sl.registerFactory(() => AuthBloc(authRepository: sl()));
+  sl.registerFactory(() => AuthBloc(
+    authRepository: sl(),
+    syncRepository: sl(),
+    categoryBloc: sl(),
+    transactionBloc: sl(),
+  ));
 
   // Category
   sl.registerLazySingleton<CategoryLocalDatasource>(
@@ -70,5 +79,18 @@ Future<void> init() async {
     () => TransactionRepositoryImpl(localDatasource: sl(), uuid: sl()),
   );
   sl.registerFactory(() => TransactionBloc(repository: sl()));
-}
 
+  // Sync
+  sl.registerLazySingleton<SyncRemoteDatasource>(
+    () => SyncRemoteDatasourceImpl(dio: sl(), prefs: sl()),
+  );
+  sl.registerLazySingleton(
+    () => SyncRepository(
+      remote: sl(),
+      categoryLocal: sl(),
+      transactionLocal: sl(),
+      prefs: sl(),
+    ),
+  );
+  sl.registerFactory(() => SyncBloc(repository: sl()));
+}

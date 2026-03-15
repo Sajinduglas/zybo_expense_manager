@@ -15,24 +15,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _nickname = 'User';
-  double _monthlyLimit = 10000;
-
   @override
   void initState() {
     super.initState();
-    _loadPrefs();
     context.read<TransactionBloc>().add(LoadTransactionsEvent());
-  }
-
-  Future<void> _loadPrefs() async {
-    final prefs = sl<SharedPreferences>();
-    setState(() {
-      _nickname = prefs.getString(AppConstants.kNickname) ?? 'User';
-      _monthlyLimit =
-          double.tryParse(prefs.getString('monthly_limit') ?? '10000') ??
-              10000;
-    });
   }
 
   String _formatDate(DateTime dt) {
@@ -53,6 +39,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Read directly inside build to ensure it catches latest changes immediately
+    final prefs = sl<SharedPreferences>();
+    final nickname = prefs.getString(AppConstants.kNickname) ?? 'User';
+    final monthlyLimit = double.tryParse(prefs.getString('monthly_limit') ?? '10000') ?? 10000;
+
     return BlocBuilder<TransactionBloc, TransactionState>(
       builder: (context, txState) {
         double income = 0;
@@ -63,8 +54,8 @@ class _HomePageState extends State<HomePage> {
         }
 
         final progress =
-            _monthlyLimit > 0 ? (expense / _monthlyLimit).clamp(0.0, 1.0) : 0.0;
-        final remaining = ((_monthlyLimit - expense) / _monthlyLimit * 100)
+            monthlyLimit > 0 ? (expense / monthlyLimit).clamp(0.0, 1.0) : 0.0;
+        final remaining = ((monthlyLimit - expense) / monthlyLimit * 100)
             .clamp(0, 100)
             .toStringAsFixed(0);
 
@@ -77,7 +68,7 @@ class _HomePageState extends State<HomePage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Text(
-                  '👋 Welcome, $_nickname!',
+                  '👋 Welcome, $nickname!',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -137,7 +128,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '₹${expense.toStringAsFixed(0)} / ₹${_monthlyLimit.toStringAsFixed(0)}',
+                        '₹${expense.toStringAsFixed(0)} / ₹${monthlyLimit.toStringAsFixed(0)}',
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 17,
@@ -152,7 +143,7 @@ class _HomePageState extends State<HomePage> {
                           backgroundColor:
                               Colors.white.withValues(alpha: 0.12),
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            expense >= _monthlyLimit
+                            expense >= monthlyLimit
                                 ? Colors.red
                                 : const Color(0xFF4CAF50),
                           ),

@@ -6,6 +6,13 @@ import '../../../../di/injection.dart';
 import '../bloc/category_bloc.dart';
 import '../bloc/category_state.dart';
 import '../bloc/category_event.dart';
+import '../../../sync/presentation/bloc/sync_bloc.dart';
+import '../../../sync/presentation/bloc/sync_event.dart';
+import '../../../sync/presentation/bloc/sync_state.dart';
+import '../../../sync/data/repositories/sync_repository.dart';
+import '../../../../core/database/database_helper.dart';
+import '../../../transactions/presentation/bloc/transaction_bloc.dart';
+import '../../../transactions/presentation/bloc/transaction_event.dart';
 import 'package:go_router/go_router.dart';
 
 // ── Design constants ───────────────────────────────────────────────────────────
@@ -25,7 +32,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   final _nicknameController = TextEditingController();
   final _limitController = TextEditingController();
   final _categoryController = TextEditingController();
-  String _currentLimit = '1000';
+  String _currentLimit = '10000';
   bool _editingNickname = false;
 
   @override
@@ -47,7 +54,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     final prefs = sl<SharedPreferences>();
     setState(() {
       _nicknameController.text = prefs.getString(AppConstants.kNickname) ?? '';
-      _currentLimit = prefs.getString('monthly_limit') ?? '1000';
+      _currentLimit = prefs.getString('monthly_limit') ?? '10000';
       _limitController.text = _currentLimit;
     });
   }
@@ -67,6 +74,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     await prefs.setString('monthly_limit', _limitController.text);
     setState(() => _currentLimit = _limitController.text);
     if (mounted) {
+      context.read<TransactionBloc>().add(LoadTransactionsEvent());
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Limit saved')));
     }
@@ -81,9 +89,42 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   }
 
   void _logout() async {
+    final hasPending = await sl<SyncRepository>().hasPendingSyncData();
+    if (hasPending && mounted) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: const Color(0xFF1E1E1E),
+          title: const Text('Unsynced Data', style: TextStyle(color: Colors.white)),
+          content: const Text(
+            'You have unsynced data. Logging out will delete all local data permanently. Are you sure you want to log out?',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Log Out', style: TextStyle(color: Colors.redAccent)),
+            ),
+          ],
+        ),
+      );
+      if (confirm != true) return;
+    }
+
+    // Clear all data
+    await sl<DatabaseHelper>().clearAllData();
     final prefs = sl<SharedPreferences>();
+    final onboardingDone = prefs.getBool(AppConstants.kOnboardingComplete) ?? false;
     await prefs.clear();
-    if (mounted) context.go('/onboarding');
+    if (onboardingDone) {
+      await prefs.setBool(AppConstants.kOnboardingComplete, true);
+    }
+    
+    if (mounted) context.go('/auth/phone');
   }
 
   @override
@@ -393,53 +434,103 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             // ── CLOUD SYNC ───────────────────────────────────────────────────
             _sectionHeader('CLOUD SYNC'),
             const SizedBox(height: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: _card,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.all(12),
-              child: GestureDetector(
-                onTap: () {
-                  // TODO: Sync
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: _blue,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      const Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Sync To Cloud',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(height: 3),
-                            Text(
-                              'Sync and update data to the backend',
-                              style: TextStyle(
-                                  color: Colors.white70, fontSize: 12),
-                            ),
-                          ],
-                        ),
+            BlocConsumer<SyncBloc, SyncState>(
+              listener: (context, state) {
+                if (state is SyncSuccess) {
+                  final r = state.result;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.green.shade800,
+                      content: Text(
+                        '✅ Sync complete! ${r.categoriesSynced} categories, '
+                        '${r.transactionsSynced} transactions, '
+                        '${r.deletionsProcessed} deletions processed.',
                       ),
-                      const Icon(Icons.cloud_upload_outlined,
-                          color: Colors.white70, size: 26),
-                    ],
+                    ),
+                  );
+                } else if (state is SyncFailure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.red.shade800,
+                      content: Text('❌ Sync failed: ${state.message}'),
+                    ),
+                  );
+                }
+              },
+              builder: (context, state) {
+                final isSyncing = state is SyncInProgress;
+                String lastSynced = 'Never';
+                if (state is SyncIdle && state.lastSyncedTime != null) {
+                  try {
+                    final dt = DateTime.parse(state.lastSyncedTime!);
+                    lastSynced =
+                        '${dt.day}/${dt.month}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+                  } catch (_) {
+                    lastSynced = state.lastSyncedTime!;
+                  }
+                }
+                return Container(
+                  decoration: BoxDecoration(
+                    color: _card,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-              ),
+                  padding: const EdgeInsets.all(12),
+                  child: GestureDetector(
+                    onTap: isSyncing
+                        ? null
+                        : () => context
+                            .read<SyncBloc>()
+                            .add(const TriggerSyncEvent()),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 16),
+                      decoration: BoxDecoration(
+                        color: isSyncing
+                            ? _blue.withValues(alpha: 0.7)
+                            : _blue,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isSyncing ? 'Syncing...' : 'Sync To Cloud',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  'Last synced: $lastSynced',
+                                  style: const TextStyle(
+                                      color: Colors.white70, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ),
+                          isSyncing
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Icon(Icons.cloud_upload_outlined,
+                                  color: Colors.white70, size: 26),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
 
