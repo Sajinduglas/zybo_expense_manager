@@ -26,6 +26,7 @@ class SyncRemoteDatasourceImpl implements SyncRemoteDatasource {
 
   /// Adds the Authorization header for every authenticated call.
   Options get _authOptions => Options(
+        contentType: 'application/json',
         headers: {
           'Authorization': 'Token ${_prefs.getString(AppConstants.kToken) ?? ''}',
         },
@@ -84,11 +85,13 @@ class SyncRemoteDatasourceImpl implements SyncRemoteDatasource {
         data: {'ids': ids},
         options: _authOptions,
       );
-      final data = resp.data as Map<String, dynamic>? ?? {};
-      if (data['deleted_ids'] != null && data['deleted_ids'] is List) {
-        return (data['deleted_ids'] as List).cast<String>();
+      final data = resp.data;
+      if (data is Map<String, dynamic>) {
+        if (data['deleted_ids'] != null && data['deleted_ids'] is List) {
+          return (data['deleted_ids'] as List).cast<String>();
+        }
       }
-      return ids; // Fallback
+      return ids; // Fallback to original list on successful execution
     } on DioException catch (e) {
       throw NetworkException(
           message: e.response?.data?['detail'] ?? e.message ?? 'Failed to delete categories');

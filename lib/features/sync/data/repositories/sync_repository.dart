@@ -43,67 +43,87 @@ class SyncRepository {
     int deletionsProcessed = 0;
     int categoriesSynced = 0;
     int transactionsSynced = 0;
+    final List<String> errors = [];
 
     // 1. Category Delete
-    final deletedCatIds = await _categoryLocal.getDeletedIds();
-    if (deletedCatIds.isNotEmpty) {
-      final confirmedIds = await _remote.deleteCloudCategories(deletedCatIds);
-      if (confirmedIds.isNotEmpty) {
-        await _categoryLocal.permanentlyDelete(confirmedIds);
-        deletionsProcessed += confirmedIds.length;
+    try {
+      final deletedCatIds = await _categoryLocal.getDeletedIds();
+      if (deletedCatIds.isNotEmpty) {
+        final confirmedIds = await _remote.deleteCloudCategories(deletedCatIds);
+        if (confirmedIds.isNotEmpty) {
+          await _categoryLocal.permanentlyDelete(confirmedIds);
+          deletionsProcessed += confirmedIds.length;
+        }
       }
+    } catch (e) {
+      errors.add('Category Delete error: $e');
     }
 
     // 2. Category Add
-    final unsyncedCatMaps = await _categoryLocal.getUnsynced();
-    if (unsyncedCatMaps.isNotEmpty) {
-      final payload = unsyncedCatMaps
-          .map((m) => {'id': m['id'], 'name': m['name']})
-          .toList();
-      final syncedIds = await _remote.pushCategories(payload);
-      if (syncedIds.isNotEmpty) {
-        await _categoryLocal.markSynced(syncedIds);
-        categoriesSynced += syncedIds.length;
+    try {
+      final unsyncedCatMaps = await _categoryLocal.getUnsynced();
+      if (unsyncedCatMaps.isNotEmpty) {
+        final payload = unsyncedCatMaps
+            .map((m) => {'id': m['id'], 'name': m['name']})
+            .toList();
+        final syncedIds = await _remote.pushCategories(payload);
+        if (syncedIds.isNotEmpty) {
+          await _categoryLocal.markSynced(syncedIds);
+          categoriesSynced += syncedIds.length;
+        }
       }
+    } catch (e) {
+      errors.add('Category Add error: $e');
     }
 
     // 3. Transaction Delete
-    final deletedTxIds = await _transactionLocal.getDeletedIds();
-    if (deletedTxIds.isNotEmpty) {
-      final confirmedIds = await _remote.deleteCloudTransactions(deletedTxIds);
-      if (confirmedIds.isNotEmpty) {
-        await _transactionLocal.permanentlyDelete(confirmedIds);
-        deletionsProcessed += confirmedIds.length;
+    try {
+      final deletedTxIds = await _transactionLocal.getDeletedIds();
+      if (deletedTxIds.isNotEmpty) {
+        final confirmedIds = await _remote.deleteCloudTransactions(deletedTxIds);
+        if (confirmedIds.isNotEmpty) {
+          await _transactionLocal.permanentlyDelete(confirmedIds);
+          deletionsProcessed += confirmedIds.length;
+        }
       }
+    } catch (e) {
+      errors.add('Transaction Delete error: $e');
     }
 
     // 4. Transaction Add
-    final unsyncedTxMaps = await _transactionLocal.getUnsynced();
-    if (unsyncedTxMaps.isNotEmpty) {
-      final payload = unsyncedTxMaps.map((m) {
-        return {
-          'id': m['id'],
-          'amount': m['amount'],
-          'note': m['note'],
-          'type': m['type'],
-          'category_id': m['category_id'],
-          'timestamp': m['timestamp'],
-        };
-      }).toList();
-      final syncedIds = await _remote.pushTransactions(payload);
-      if (syncedIds.isNotEmpty) {
-        await _transactionLocal.markSynced(syncedIds);
-        transactionsSynced += syncedIds.length;
+    try {
+      final unsyncedTxMaps = await _transactionLocal.getUnsynced();
+      if (unsyncedTxMaps.isNotEmpty) {
+        final payload = unsyncedTxMaps.map((m) {
+          return {
+            'id': m['id'],
+            'amount': m['amount'],
+            'note': m['note'],
+            'type': m['type'],
+            'category_id': m['category_id'],
+            'timestamp': m['timestamp'],
+          };
+        }).toList();
+        final syncedIds = await _remote.pushTransactions(payload);
+        if (syncedIds.isNotEmpty) {
+          await _transactionLocal.markSynced(syncedIds);
+          transactionsSynced += syncedIds.length;
+        }
       }
+    } catch (e) {
+      errors.add('Transaction Add error: $e');
     }
 
-    // Update last-synced timestamp
+    // Update last-synced timestamp even if partial success
     final now = DateTime.now().toIso8601String();
     await _prefs.setString('last_synced', now);
 
+    bool isSuccess = errors.isEmpty;
+    String message = isSuccess ? 'Sync complete' : 'Sync completed with ${errors.length} errors';
+
     return SyncResult(
-      success: true,
-      message: 'Sync complete',
+      success: true, // We return true to indicate the process finished (partial or full)
+      message: message,
       categoriesSynced: categoriesSynced,
       transactionsSynced: transactionsSynced,
       deletionsProcessed: deletionsProcessed,
