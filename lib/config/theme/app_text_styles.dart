@@ -63,4 +63,26 @@ class AppTextStyles {
     fontSize: 16.0,
     color: AppColors.white,
   );
+
+  static const TextStyle authTitle = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w600,
+    fontSize: 24.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle authSubtitle = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w400,
+    fontSize: 15.0,
+    color: AppColors.white,
+    // Note: opacity handled at call site via copyWith or predefined tokens
+  );
+
+  static const TextStyle authBody15 = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w400,
+    fontSize: 15.0,
+    color: AppColors.white,
+  );
 }

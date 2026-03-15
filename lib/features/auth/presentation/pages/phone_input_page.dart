@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../config/theme/app_colors.dart';
 import '../../../../config/router/route_names.dart';
 import '../../../../config/theme/app_text_styles.dart';
 import '../../../../di/injection.dart';
@@ -37,9 +38,9 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
 
   @override
   Widget build(BuildContext context) {
-    const Color buttonColor = Color(0xFF3B38D0);
-    const Color inputBackground = Color(0xFF2A2A2A);
-    const Color background = Color(0xFF141414);
+    const Color buttonColor = AppColors.onboardingBlue;
+    const Color inputBackground = AppColors.authFieldBackground;
+    const Color background = AppColors.authBackground;
 
     return BlocProvider(
       create: (_) => sl<AuthBloc>(),
@@ -70,17 +71,13 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                         const SizedBox(height: 32),
                         Text(
                           'Get Started',
-                          style: AppTextStyles.title.copyWith(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: AppTextStyles.authTitle,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Log In Using Phone & OTP',
-                          style: AppTextStyles.body.copyWith(
-                            color: Colors.white.withValues(alpha: 0.7),
+                          style: AppTextStyles.authSubtitle.copyWith(
+                            color: AppColors.white.withValues(alpha: 0.8),
                           ),
                         ),
                         const SizedBox(height: 48),
@@ -92,7 +89,7 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                           child: Row(
                             children: [
-                              Text('+91', style: AppTextStyles.body.copyWith(color: Colors.white)),
+                              Text('+91', style: AppTextStyles.authBody15),
                               const SizedBox(width: 8),
                               Container(width: 1, height: 20, color: Colors.white.withValues(alpha: 0.3)),
                               const SizedBox(width: 12),
@@ -100,11 +97,11 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                                 child: TextField(
                                   controller: _phoneController,
                                   keyboardType: TextInputType.phone,
-                                  style: AppTextStyles.body.copyWith(color: Colors.white),
+                                  style: AppTextStyles.authBody15,
                                   decoration: InputDecoration(
                                     hintText: 'Phone',
-                                    hintStyle: AppTextStyles.body.copyWith(
-                                      color: Colors.white.withValues(alpha: 0.4),
+                                    hintStyle: AppTextStyles.authBody15.copyWith(
+                                      color: AppColors.white.withValues(alpha: 0.6),
                                     ),
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
@@ -132,7 +129,10 @@ class _PhoneInputPageState extends State<PhoneInputPage> {
                                   child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                                 )
                               : Text('Continue',
-                                  style: AppTextStyles.button.copyWith(color: Colors.white)),
+                                  style: AppTextStyles.body.copyWith(
+                                    color: AppColors.white,
+                                    fontWeight: FontWeight.w600,
+                                  )),
                         ),
                       ],
                     ),
