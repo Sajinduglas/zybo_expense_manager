@@ -85,6 +85,15 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     if (name.isNotEmpty) {
       context.read<CategoryBloc>().add(AddCategoryEvent(name));
       _categoryController.clear();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a category name'),
+          backgroundColor: Color(0xFF3B38D0),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
