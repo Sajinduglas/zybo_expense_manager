@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zybo_expense_manager/features/categories/presentation/bloc/category_bloc.dart';
+import 'package:zybo_expense_manager/features/transactions/presentation/bloc/transaction_bloc.dart';
 import 'package:zybo_expense_manager/config/router/app_router.dart';
 import 'package:zybo_expense_manager/config/theme/app_theme.dart';
 import 'package:zybo_expense_manager/di/injection.dart' as di;
@@ -20,11 +23,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Zybo Expense Manager',
-      theme: AppTheme.lightTheme,
-      routerConfig: appRouter,
-      debugShowCheckedModeBanner: false,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<CategoryBloc>(create: (_) => di.sl<CategoryBloc>()),
+        BlocProvider<TransactionBloc>(create: (_) => di.sl<TransactionBloc>()),
+      ],
+      child: MaterialApp.router(
+        title: 'Zybo Expense Manager',
+        theme: AppTheme.lightTheme,
+        routerConfig: appRouter,
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

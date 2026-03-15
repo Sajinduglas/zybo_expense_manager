@@ -9,6 +9,9 @@ import '../../features/auth/presentation/pages/phone_input_page.dart';
 import '../../features/auth/presentation/pages/nickname_page.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
 
+import '../../features/shared/presentation/pages/main_layout_page.dart';
+import '../../features/transactions/presentation/pages/transactions_page.dart';
+
 /// Reads SharedPreferences synchronously after init (prefs already populated).
 GoRouter createRouter(SharedPreferences prefs) {
   return GoRouter(
@@ -76,16 +79,11 @@ GoRouter createRouter(SharedPreferences prefs) {
       ),
       GoRoute(
         path: RouteNames.home,
-        builder: (context, state) => const Scaffold(
-          backgroundColor: Color(0xFF141414),
-          body: Center(child: Text('Home', style: TextStyle(color: Colors.white))),
-        ),
+        builder: (context, state) => const MainLayoutPage(),
       ),
       GoRoute(
         path: RouteNames.transactions,
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Transactions')),
-        ),
+        builder: (context, state) => const TransactionsPage(),
       ),
       GoRoute(
         path: RouteNames.categories,
