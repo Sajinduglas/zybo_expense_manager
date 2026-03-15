@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/transaction_bloc.dart';
 import '../bloc/transaction_state.dart';
 import '../bloc/transaction_event.dart';
+import '../../../shared/presentation/widgets/app_shimmers.dart';
 
 class TransactionsPage extends StatelessWidget {
   const TransactionsPage({super.key});
@@ -44,7 +45,12 @@ class TransactionsPage extends StatelessWidget {
               builder: (context, state) {
                 if (state is TransactionLoading ||
                     state is TransactionInitial) {
-                  return const Center(child: CircularProgressIndicator());
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: 8,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (_, __) => const TransactionItemShimmer(),
+                  );
                 }
                 if (state is TransactionLoaded) {
                   if (state.allTransactions.isEmpty) {

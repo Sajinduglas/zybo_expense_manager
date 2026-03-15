@@ -14,6 +14,7 @@ import '../../../../core/database/database_helper.dart';
 import '../../../transactions/presentation/bloc/transaction_bloc.dart';
 import '../../../transactions/presentation/bloc/transaction_event.dart';
 import 'package:go_router/go_router.dart';
+import '../../../shared/presentation/widgets/app_shimmers.dart';
 
 // ── Design constants ───────────────────────────────────────────────────────────
 const Color _card = Color(0xFF1E1E1E);
@@ -34,6 +35,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   final _categoryController = TextEditingController();
   String _currentLimit = '10000';
   bool _editingNickname = false;
+  String? _categoryError;
+  String? _nicknameError;
+  String? _limitError;
 
   @override
   void initState() {
@@ -60,9 +64,17 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   }
 
   Future<void> _saveNickname() async {
+    final text = _nicknameController.text.trim();
+    if (text.isEmpty) {
+      setState(() => _nicknameError = 'Nickname cannot be empty');
+      return;
+    }
     final prefs = sl<SharedPreferences>();
-    await prefs.setString(AppConstants.kNickname, _nicknameController.text);
-    setState(() => _editingNickname = false);
+    await prefs.setString(AppConstants.kNickname, text);
+    setState(() {
+      _editingNickname = false;
+      _nicknameError = null;
+    });
     if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Nickname saved')));
@@ -70,9 +82,23 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   }
 
   Future<void> _saveLimit() async {
+    final text = _limitController.text.trim();
+    if (text.isEmpty) {
+      setState(() => _limitError = 'Limit cannot be empty');
+      return;
+    }
+    final limit = double.tryParse(text);
+    if (limit == null || limit < 0) {
+      setState(() => _limitError = 'Enter a valid amount');
+      return;
+    }
+    
     final prefs = sl<SharedPreferences>();
-    await prefs.setString('monthly_limit', _limitController.text);
-    setState(() => _currentLimit = _limitController.text);
+    await prefs.setString('monthly_limit', text);
+    setState(() {
+      _currentLimit = text;
+      _limitError = null;
+    });
     if (mounted) {
       context.read<TransactionBloc>().add(LoadTransactionsEvent());
       ScaffoldMessenger.of(context)
@@ -85,15 +111,9 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     if (name.isNotEmpty) {
       context.read<CategoryBloc>().add(AddCategoryEvent(name));
       _categoryController.clear();
+      setState(() => _categoryError = null);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a category name'),
-          backgroundColor: Color(0xFF3B38D0),
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      setState(() => _categoryError = 'Please enter a category name');
     }
   }
 
@@ -215,6 +235,11 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 ],
               ),
             ),
+            if (_nicknameError != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 8, top: 4),
+                child: Text(_nicknameError!, style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
+              ),
             const SizedBox(height: 20),
 
             // ── ALERT LIMIT ──────────────────────────────────────────────────
@@ -288,6 +313,11 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                       ],
                     ),
                   ),
+                  if (_limitError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, top: 4),
+                      child: Text(_limitError!, style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
+                    ),
                   const SizedBox(height: 10),
                   Text(
                     'Current Limit: ₹$_currentLimit',
@@ -359,17 +389,31 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                       ],
                     ),
                   ),
+                  if (_categoryError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, top: 4),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _categoryError!,
+                          style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 8),
 
                   // Categories list
                   BlocBuilder<CategoryBloc, CategoryState>(
                     builder: (context, state) {
                       if (state is CategoryLoading) {
-                        return const Padding(
-                          padding: EdgeInsets.all(20),
-                          child: Center(
-                              child: CircularProgressIndicator(
-                                  color: _blue)),
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                          child: Row(
+                            children: List.generate(4, (index) => const Padding(
+                              padding: EdgeInsets.only(right: 8),
+                              child: AppShimmer(width: 80, height: 36, borderRadius: 8),
+                            )),
+                          ),
                         );
                       }
                       if (state is CategoryLoaded) {

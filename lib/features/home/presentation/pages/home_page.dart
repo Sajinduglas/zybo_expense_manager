@@ -6,6 +6,7 @@ import '../../../../di/injection.dart';
 import '../../../transactions/presentation/bloc/transaction_bloc.dart';
 import '../../../transactions/presentation/bloc/transaction_state.dart';
 import '../../../transactions/presentation/bloc/transaction_event.dart';
+import '../../../shared/presentation/widgets/app_shimmers.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -41,10 +42,11 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return BlocBuilder<TransactionBloc, TransactionState>(
       builder: (context, txState) {
-        // Read directly inside builder to ensure it catches latest changes on every bloc emission
         final prefs = sl<SharedPreferences>();
         final nickname = prefs.getString(AppConstants.kNickname) ?? 'User';
         final monthlyLimit = double.tryParse(prefs.getString('monthly_limit') ?? '10000') ?? 10000;
+
+        final bool isLoading = txState is TransactionLoading || txState is TransactionInitial;
 
         double income = 0;
         double expense = 0;
@@ -53,11 +55,8 @@ class _HomePageState extends State<HomePage> {
           expense = txState.totalExpense;
         }
 
-        final progress =
-            monthlyLimit > 0 ? (expense / monthlyLimit).clamp(0.0, 1.0) : 0.0;
-        final remaining = ((monthlyLimit - expense) / monthlyLimit * 100)
-            .clamp(0, 100)
-            .toStringAsFixed(0);
+        final progress = monthlyLimit > 0 ? (expense / monthlyLimit).clamp(0.0, 1.0) : 0.0;
+        final remaining = ((monthlyLimit - expense) / monthlyLimit * 100).clamp(0, 100).toStringAsFixed(0);
 
         return SafeArea(
           child: Column(
@@ -65,8 +64,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               // ── Header ───────────────────────────────────────────────────
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Text(
                   '👋 Welcome, $nickname!',
                   style: const TextStyle(
@@ -83,21 +81,25 @@ class _HomePageState extends State<HomePage> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: _balanceCard(
-                        title: 'Total Income',
-                        amount: income,
-                        color: const Color(0xFF165A15),
-                        icon: Icons.arrow_downward,
-                      ),
+                      child: isLoading 
+                        ? const BalanceCardShimmer()
+                        : _balanceCard(
+                          title: 'Total Income',
+                          amount: income,
+                          color: const Color(0xFF165A15),
+                          icon: Icons.arrow_downward,
+                        ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
-                      child: _balanceCard(
-                        title: 'Total Expense',
-                        amount: expense,
-                        color: const Color(0xFF8B0000),
-                        icon: Icons.arrow_upward,
-                      ),
+                      child: isLoading
+                        ? const BalanceCardShimmer()
+                        : _balanceCard(
+                          title: 'Total Expense',
+                          amount: expense,
+                          color: const Color(0xFF8B0000),
+                          icon: Icons.arrow_upward,
+                        ),
                     ),
                   ],
                 ),
@@ -112,51 +114,57 @@ class _HomePageState extends State<HomePage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E1E1E),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.08)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'MONTHLY LIMIT',
-                        style: TextStyle(
-                            color: Color(0xFF888888),
-                            fontSize: 11,
-                            letterSpacing: 1.2,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '₹${expense.toStringAsFixed(0)} / ₹${monthlyLimit.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          minHeight: 8,
-                          backgroundColor:
-                              Colors.white.withValues(alpha: 0.12),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            expense >= monthlyLimit
-                                ? Colors.red
-                                : const Color(0xFF4CAF50),
+                  child: isLoading 
+                    ? const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppShimmer(width: 100, height: 10),
+                          SizedBox(height: 12),
+                          AppShimmer(width: 180, height: 20),
+                          SizedBox(height: 16),
+                          AppShimmer(width: double.infinity, height: 8, borderRadius: 4),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'MONTHLY LIMIT',
+                            style: TextStyle(
+                                color: Color(0xFF888888),
+                                fontSize: 11,
+                                letterSpacing: 1.2,
+                                fontWeight: FontWeight.w600),
                           ),
-                        ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '₹${expense.toStringAsFixed(0)} / ₹${monthlyLimit.toStringAsFixed(0)}',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 10),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              minHeight: 8,
+                              backgroundColor: Colors.white.withValues(alpha: 0.12),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                expense >= monthlyLimit ? Colors.red : const Color(0xFF4CAF50),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '$remaining% Remaining',
+                            style: const TextStyle(color: Color(0xFF888888), fontSize: 12),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '$remaining% Remaining',
-                        style: const TextStyle(
-                            color: Color(0xFF888888), fontSize: 12),
-                      ),
-                    ],
-                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -166,10 +174,7 @@ class _HomePageState extends State<HomePage> {
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'Recent Transactions',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 12),
@@ -178,10 +183,13 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: Builder(
                   builder: (context) {
-                    if (txState is TransactionLoading ||
-                        txState is TransactionInitial) {
-                      return const Center(
-                          child: CircularProgressIndicator());
+                    if (isLoading) {
+                      return ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: 5,
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (_, __) => const TransactionItemShimmer(),
+                      );
                     }
                     if (txState is TransactionLoaded) {
                       if (txState.recentTransactions.isEmpty) {
@@ -189,13 +197,11 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.receipt_long,
-                                  color: Color(0xFF444444), size: 48),
+                              const Icon(Icons.receipt_long, color: Color(0xFF444444), size: 48),
                               const SizedBox(height: 12),
                               Text(
                                 'No transactions yet.',
-                                style: TextStyle(
-                                    color: Colors.white38, fontSize: 14),
+                                style: TextStyle(color: Colors.white38, fontSize: 14),
                               ),
                             ],
                           ),
@@ -204,14 +210,12 @@ class _HomePageState extends State<HomePage> {
                       return ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         itemCount: txState.recentTransactions.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 10),
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {
                           final tx = txState.recentTransactions[index];
                           final isCredit = tx.type == 'credit';
                           return Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                             decoration: BoxDecoration(
                               color: const Color(0xFF1E1E1E),
                               borderRadius: BorderRadius.circular(12),
@@ -236,8 +240,7 @@ class _HomePageState extends State<HomePage> {
                                 // Name + Category
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
@@ -251,9 +254,7 @@ class _HomePageState extends State<HomePage> {
                                       const SizedBox(height: 2),
                                       Text(
                                         tx.categoryName ?? 'Uncategorized',
-                                        style: const TextStyle(
-                                            color: Colors.white54,
-                                            fontSize: 12),
+                                        style: const TextStyle(color: Colors.white54, fontSize: 12),
                                       ),
                                     ],
                                   ),
@@ -266,17 +267,13 @@ class _HomePageState extends State<HomePage> {
                                   children: [
                                     Text(
                                       _formatDate(tx.timestamp),
-                                      style: const TextStyle(
-                                          color: Colors.white38,
-                                          fontSize: 11),
+                                      style: const TextStyle(color: Colors.white38, fontSize: 11),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       '${isCredit ? '+' : '-'}₹${tx.amount.toStringAsFixed(0)}',
                                       style: TextStyle(
-                                        color: isCredit
-                                            ? const Color(0xFF4CAF50)
-                                            : Colors.red,
+                                        color: isCredit ? const Color(0xFF4CAF50) : Colors.red,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14,
                                       ),
@@ -286,11 +283,8 @@ class _HomePageState extends State<HomePage> {
                                 const SizedBox(width: 10),
                                 // Delete
                                 GestureDetector(
-                                  onTap: () => context
-                                      .read<TransactionBloc>()
-                                      .add(DeleteTransactionEvent(tx.id)),
-                                  child: const Icon(Icons.delete,
-                                      color: Colors.red, size: 20),
+                                  onTap: () => context.read<TransactionBloc>().add(DeleteTransactionEvent(tx.id)),
+                                  child: const Icon(Icons.delete, color: Colors.red, size: 20),
                                 ),
                               ],
                             ),
