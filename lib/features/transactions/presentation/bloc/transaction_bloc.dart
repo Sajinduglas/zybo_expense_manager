@@ -1,4 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../di/injection.dart' as di;
+import '../../../../core/services/notification_service.dart';
 import '../../domain/repositories/transaction_repository.dart';
 
 import 'transaction_event.dart';
@@ -40,6 +43,22 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         totalIncome: currentState.totalIncome + incomeChange,
         totalExpense: currentState.totalExpense + expenseChange,
       ));
+
+      // Trigger notification if limit exceeded on this specific transaction
+      if (event.transaction.type == 'debit') {
+        final prefs = di.sl<SharedPreferences>();
+        final limit = double.tryParse(prefs.getString('monthly_limit') ?? '10000') ?? 10000;
+        final newTotalExpense = currentState.totalExpense + expenseChange;
+        
+        print('=== BUDGET CHECK ===');
+        print('Expense: $newTotalExpense | Limit: $limit');
+        print('Exceeds Limit?: ${newTotalExpense > limit}');
+        print('====================');
+        
+        if (newTotalExpense > limit) {
+          di.sl<NotificationService>().showBudgetAlertNotification(newTotalExpense, limit);
+        }
+      }
 
       try {
         await repository.addTransaction(event.transaction);

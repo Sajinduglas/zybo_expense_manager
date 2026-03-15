@@ -5,6 +5,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:uuid/uuid.dart';
 import '../core/constants/api_constants.dart';
 import '../core/database/database_helper.dart';
+import '../core/services/notification_service.dart';
 import '../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
@@ -29,6 +30,7 @@ Future<void> init() async {
   // Core
   sl.registerLazySingleton(() => DatabaseHelper());
   sl.registerLazySingleton(() => const Uuid());
+  sl.registerLazySingleton(() => NotificationService());
 
   // SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();

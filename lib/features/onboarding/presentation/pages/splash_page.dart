@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../config/router/route_names.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/services/notification_service.dart';
+import '../../../../di/injection.dart' as di;
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -15,12 +17,25 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), _navigate);
+    _initializeAndNavigate();
+  }
+
+  Future<void> _initializeAndNavigate() async {
+    // Artificial delay
+    await Future.delayed(const Duration(seconds: 2));
+
+    print('[SPLASH] About to call requestPermissions()');
+    // Request push notification permissions once UI is alive
+    await NotificationService().requestPermissions();
+    print('[SPLASH] requestPermissions() done');
+
+    // Now proceed with navigation
+    _navigate();
   }
 
   Future<void> _navigate() async {
     if (!mounted) return;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = di.sl<SharedPreferences>(); // Using DI for SharedPreferences
     final hasToken = (prefs.getString(AppConstants.kToken) ?? '').isNotEmpty;
     final hasNickname = (prefs.getString(AppConstants.kNickname) ?? '').isNotEmpty;
     final onboardingDone = prefs.getBool(AppConstants.kOnboardingComplete) ?? false;

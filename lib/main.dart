@@ -6,6 +6,7 @@ import 'package:zybo_expense_manager/features/sync/presentation/bloc/sync_bloc.d
 import 'package:zybo_expense_manager/config/router/app_router.dart';
 import 'package:zybo_expense_manager/config/theme/app_theme.dart';
 import 'package:zybo_expense_manager/di/injection.dart' as di;
+import 'package:zybo_expense_manager/core/services/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +16,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
   final prefs = await SharedPreferences.getInstance();
+  
+  // Initialize Local Notifications
+  await NotificationService().init();
+  
   appRouter = createRouter(prefs);
   runApp(const MyApp());
 }

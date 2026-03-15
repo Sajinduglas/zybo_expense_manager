@@ -39,13 +39,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Read directly inside build to ensure it catches latest changes immediately
-    final prefs = sl<SharedPreferences>();
-    final nickname = prefs.getString(AppConstants.kNickname) ?? 'User';
-    final monthlyLimit = double.tryParse(prefs.getString('monthly_limit') ?? '10000') ?? 10000;
-
     return BlocBuilder<TransactionBloc, TransactionState>(
       builder: (context, txState) {
+        // Read directly inside builder to ensure it catches latest changes on every bloc emission
+        final prefs = sl<SharedPreferences>();
+        final nickname = prefs.getString(AppConstants.kNickname) ?? 'User';
+        final monthlyLimit = double.tryParse(prefs.getString('monthly_limit') ?? '10000') ?? 10000;
+
         double income = 0;
         double expense = 0;
         if (txState is TransactionLoaded) {
