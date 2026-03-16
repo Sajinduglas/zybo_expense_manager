@@ -176,10 +176,12 @@ class SyncRemoteDatasourceImpl implements SyncRemoteDatasource {
         options: _authOptions,
       );
       final data = resp.data as Map<String, dynamic>? ?? {};
-      if (data['deleted_ids'] != null && data['deleted_ids'] is List) {
-        return (data['deleted_ids'] as List).cast<String>();
+      final backendIds = data['deleted_ids'];
+      // Use backend IDs only if non-empty; otherwise trust the 200 OK and use sent IDs
+      if (backendIds is List && backendIds.isNotEmpty) {
+        return backendIds.cast<String>();
       }
-      return ids; // Fallback
+      return ids; // Fallback — backend confirmed with 200 but returned empty list
     } on DioException catch (e) {
       throw NetworkException(
         message:

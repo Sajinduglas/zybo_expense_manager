@@ -82,13 +82,10 @@ class SyncRepository {
     try {
       final deletedTxIds = await _transactionLocal.getDeletedIds();
       if (deletedTxIds.isNotEmpty) {
-        final confirmedIds = await _remote.deleteCloudTransactions(
-          deletedTxIds,
-        );
-        if (confirmedIds.isNotEmpty) {
-          await _transactionLocal.permanentlyDelete(confirmedIds);
-          deletionsProcessed += confirmedIds.length;
-        }
+        final confirmedIds = await _remote.deleteCloudTransactions(deletedTxIds);
+        // Always clean up locally — confirmedIds fall back to sent IDs on empty backend response
+        await _transactionLocal.permanentlyDelete(confirmedIds.isNotEmpty ? confirmedIds : deletedTxIds);
+        deletionsProcessed += deletedTxIds.length;
       }
     } catch (e) {
       errors.add('Transaction Delete error: $e');
