@@ -191,7 +191,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 },
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  hintText: 'Title / Note',
+                  hintText: 'Title ',
                   hintStyle: TextStyle(color: Colors.white38),
                   filled: true,
                   fillColor: Colors.transparent,

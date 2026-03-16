@@ -32,4 +32,6 @@ class AppColors {
   static const Color creditGreen = Color(0xFF34FF4F);
   static const Color debitRed = Color(0xFFFF3437);
   static const Color deleteRed = Color(0xFFE50000);
+  static const Color profileNicknameText = Color(0xFFBFBFBF);
+  static const Color profileBorder = Color(0x1AFFFFFF);
 }

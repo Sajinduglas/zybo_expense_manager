@@ -15,12 +15,13 @@ import '../../../transactions/presentation/bloc/transaction_bloc.dart';
 import '../../../transactions/presentation/bloc/transaction_event.dart';
 import 'package:go_router/go_router.dart';
 import '../../../shared/presentation/widgets/app_shimmers.dart';
+import '../../../../config/theme/app_colors.dart';
+import '../../../../config/theme/app_text_styles.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 // ── Design constants ───────────────────────────────────────────────────────────
-const Color _card = Color(0xFF1E1E1E);
-const Color _inputBg = Color(0xFF2A2A2A);
-const Color _blue = Color(0xFF3B38D0);
-const Color _sectionLabel = Color(0xFF888888);
+const Color _card = AppColors.darkSurface;
+const Color _blue = AppColors.blue;
 
 class ProfileSettingsPage extends StatefulWidget {
   const ProfileSettingsPage({super.key});
@@ -174,7 +175,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     fontSize: 22,
                     fontWeight: FontWeight.bold),
               ),
-            ),
+            ),//size 20 weight 600  white 
             const SizedBox(height: 24),
 
             // ── NICKNAME ─────────────────────────────────────────────────────
@@ -194,11 +195,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                       enabled: _editingNickname,
                       autocorrect: false,
                       enableSuggestions: false,
-                      cursorColor: Colors.white,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500),
+                      cursorColor: AppColors.white,
+                      style: AppTextStyles.profileNickname,
                       decoration: const InputDecoration(
                         filled: true,
                         fillColor: Colors.transparent,
@@ -219,17 +217,15 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                       }
                     },
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: 30,
+                      height: 30,
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.white24, width: 1.5),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(
-                        _editingNickname ? Icons.check : Icons.edit,
-                        color: Colors.white,
-                        size: 18,
-                      ),
+                      child: _editingNickname
+                          ? const Icon(Icons.check, color: AppColors.white, size: 20)
+                          : _svgIcon('PencilSimple', color: AppColors.white, size: 5),
                     ),
                   ),
                 ],
@@ -252,34 +248,32 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'ALERT LIMIT (₹)',
-                    style: TextStyle(
-                        color: _sectionLabel,
-                        fontSize: 11,
-                        letterSpacing: 1.2,
-                        fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: _inputBg,
-                      borderRadius: BorderRadius.circular(10),
+                    style: AppTextStyles.profileSectionLabel.copyWith(
+                      color: AppColors.white.withValues(alpha: 0.7),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.scafoldBackground,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: AppColors.profileBorder),
+                          ),
                           child: TextField(
                             controller: _limitController,
                             autocorrect: false,
                             enableSuggestions: false,
-                            cursorColor: Colors.white,
+                            cursorColor: AppColors.white,
                             keyboardType: const TextInputType.numberWithOptions(
                                 decimal: true),
-                            style: const TextStyle(
-                                color: Colors.white60, fontSize: 16),
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(
+                            style: AppTextStyles.profileLimitHint,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 16, vertical: 14),
                               filled: true,
                               fillColor: Colors.transparent,
@@ -287,47 +281,51 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
                               hintText: 'Amount (₹)',
-                              hintStyle: TextStyle(color: Colors.white38),
+                              hintStyle: AppTextStyles.profileLimitHint.copyWith(
+                                color: AppColors.white.withValues(alpha: 0.3),
+                              ),
                             ),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: _saveLimit,
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 6),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: _blue,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              'Set',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14),
+                      ),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: _saveLimit,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: _blue,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Set',
+                            style: AppTextStyles.profileLimitAmount.copyWith(
+                              fontSize: 14,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                   if (_limitError != null)
                     Padding(
-                      padding: const EdgeInsets.only(left: 4, top: 4),
-                      child: Text(_limitError!, style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
+                      padding: const EdgeInsets.all(4),
+                      child: Text(_limitError!,
+                          style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
                     ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   Text(
                     'Current Limit: ₹$_currentLimit',
-                    style: const TextStyle(color: Colors.white60, fontSize: 13),
+                    style: AppTextStyles.profileLimitCurrent.copyWith(
+                      color: AppColors.white.withValues(alpha: 0.8),
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
-
+/// do till above the categories 
             // ── CATEGORIES ───────────────────────────────────────────────────
             _sectionHeader('CATEGORIES'),
             const SizedBox(height: 8),
@@ -347,7 +345,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: _inputBg,
+                              color: AppColors.authFieldBackground,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: TextField(
@@ -626,12 +624,25 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Text(
         label,
-        style: const TextStyle(
-            color: _sectionLabel,
-            fontSize: 11,
-            letterSpacing: 1.2,
-            fontWeight: FontWeight.w600),
+        style: AppTextStyles.profileSectionLabel.copyWith(
+          color: AppColors.white.withValues(alpha: 0.5),
+          fontSize: 12,
+          letterSpacing: 1.2,
+        ),
       ),
+    );
+  }
+
+  Widget _svgIcon(
+    String assetName, {
+    Color color = AppColors.white,
+    double size = 10,
+  }) {
+    return SvgPicture.asset(
+      'assets/icons/$assetName.svg',
+      width: size,
+      height: size,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     );
   }
 }

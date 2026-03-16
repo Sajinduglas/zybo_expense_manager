@@ -163,4 +163,40 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     fontSize: 22.0,
   );
+
+  // Profile Screen Styles
+  static const TextStyle profileNickname = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w600,
+    fontSize: 20.0,
+    color: AppColors.profileNicknameText,
+  );
+
+  static const TextStyle profileSectionLabel = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w400,
+    fontSize: 14.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle profileLimitHint = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w500,
+    fontSize: 18.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle profileLimitCurrent = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w400,
+    fontSize: 15.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle profileLimitAmount = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w600,
+    fontSize: 16.0,
+    color: AppColors.white,
+  );
 }

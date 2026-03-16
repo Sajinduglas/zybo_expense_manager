@@ -4,6 +4,8 @@ import '../bloc/transaction_bloc.dart';
 import '../bloc/transaction_state.dart';
 import '../bloc/transaction_event.dart';
 import '../../../shared/presentation/widgets/app_shimmers.dart';
+import '../../../../config/theme/app_colors.dart';
+import '../../../../config/theme/app_text_styles.dart';
 
 class TransactionsPage extends StatelessWidget {
   const TransactionsPage({super.key});
@@ -34,10 +36,7 @@ class TransactionsPage extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(20, 24, 20, 16),
             child: Text(
               'Transactions',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold),
+              style: AppTextStyles.homeWelcome,
             ),
           ),
           Expanded(
@@ -110,17 +109,13 @@ class TransactionsPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     tx.note,
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600),
+                                    style: AppTextStyles.txName,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     tx.categoryName ?? 'Uncategorized',
-                                    style: const TextStyle(
-                                        color: Colors.white54, fontSize: 12),
+                                    style: AppTextStyles.txCategory,
                                   ),
                                 ],
                               ),
@@ -133,18 +128,15 @@ class TransactionsPage extends StatelessWidget {
                               children: [
                                 Text(
                                   _formatDate(tx.timestamp),
-                                  style: const TextStyle(
-                                      color: Colors.white38, fontSize: 11),
+                                  style: AppTextStyles.txDate,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   '${isCredit ? '+' : '-'}₹${tx.amount.toStringAsFixed(0)}',
-                                  style: TextStyle(
+                                  style: AppTextStyles.txAmount.copyWith(
                                     color: isCredit
-                                        ? const Color(0xFF4CAF50)
-                                        : Colors.red,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                        ? AppColors.creditGreen
+                                        : AppColors.debitRed,
                                   ),
                                 ),
                               ],
@@ -156,7 +148,7 @@ class TransactionsPage extends StatelessWidget {
                                   .read<TransactionBloc>()
                                   .add(DeleteTransactionEvent(tx.id)),
                               child: const Icon(Icons.delete,
-                                  color: Colors.red, size: 20),
+                                  color: AppColors.deleteRed, size: 22),
                             ),
                           ],
                         ),
