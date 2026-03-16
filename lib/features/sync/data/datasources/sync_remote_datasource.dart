@@ -12,7 +12,9 @@ abstract class SyncRemoteDatasource {
 
   // Transactions
   Future<List<Map<String, dynamic>>> fetchCloudTransactions();
-  Future<List<String>> pushTransactions(List<Map<String, dynamic>> transactions);
+  Future<List<String>> pushTransactions(
+    List<Map<String, dynamic>> transactions,
+  );
   Future<List<String>> deleteCloudTransactions(List<String> ids);
 }
 
@@ -21,34 +23,42 @@ class SyncRemoteDatasourceImpl implements SyncRemoteDatasource {
   final SharedPreferences _prefs;
 
   SyncRemoteDatasourceImpl({required Dio dio, required SharedPreferences prefs})
-      : _dio = dio,
-        _prefs = prefs;
+    : _dio = dio,
+      _prefs = prefs;
 
   /// Adds the Authorization header for every authenticated call.
   Options get _authOptions => Options(
-        contentType: 'application/json',
-        headers: {
-          'Authorization': 'Token ${_prefs.getString(AppConstants.kToken) ?? ''}',
-        },
-      );
+    headers: {
+      'Authorization': 'Token ${_prefs.getString(AppConstants.kToken) ?? ''}',
+    },
+  );
 
   // ── Category API ──────────────────────────────────────────────────────────
 
   @override
   Future<List<Map<String, dynamic>>> fetchCloudCategories() async {
     try {
-      final resp = await _dio.get(ApiConstants.getCategories, options: _authOptions);
+      final resp = await _dio.get(
+        ApiConstants.getCategories,
+        options: _authOptions,
+      );
       final data = resp.data as Map<String, dynamic>;
       final list = data['categories'] as List<dynamic>;
       return list.cast<Map<String, dynamic>>();
     } on DioException catch (e) {
       throw NetworkException(
-          message: e.response?.data?['detail'] ?? e.message ?? 'Failed to fetch categories');
+        message:
+            e.response?.data?['detail'] ??
+            e.message ??
+            'Failed to fetch categories',
+      );
     }
   }
 
   @override
-  Future<List<String>> pushCategories(List<Map<String, dynamic>> categories) async {
+  Future<List<String>> pushCategories(
+    List<Map<String, dynamic>> categories,
+  ) async {
     if (categories.isEmpty) return [];
     try {
       final List<String> syncedIds = [];
@@ -72,7 +82,11 @@ class SyncRemoteDatasourceImpl implements SyncRemoteDatasource {
       return syncedIds;
     } on DioException catch (e) {
       throw NetworkException(
-          message: e.response?.data?['detail'] ?? e.message ?? 'Failed to sync categories');
+        message:
+            e.response?.data?['detail'] ??
+            e.message ??
+            'Failed to sync categories',
+      );
     }
   }
 
@@ -85,16 +99,18 @@ class SyncRemoteDatasourceImpl implements SyncRemoteDatasource {
         data: {'ids': ids},
         options: _authOptions,
       );
-      final data = resp.data;
-      if (data is Map<String, dynamic>) {
-        if (data['deleted_ids'] != null && data['deleted_ids'] is List) {
-          return (data['deleted_ids'] as List).cast<String>();
-        }
+      final data = resp.data as Map<String, dynamic>? ?? {};
+      if (data['deleted_ids'] != null && data['deleted_ids'] is List) {
+        return (data['deleted_ids'] as List).cast<String>();
       }
-      return ids; // Fallback to original list on successful execution
+      return ids; // Fallback
     } on DioException catch (e) {
       throw NetworkException(
-          message: e.response?.data?['detail'] ?? e.message ?? 'Failed to delete categories');
+        message:
+            e.response?.data?['detail'] ??
+            e.message ??
+            'Failed to delete categories',
+      );
     }
   }
 
@@ -103,18 +119,27 @@ class SyncRemoteDatasourceImpl implements SyncRemoteDatasource {
   @override
   Future<List<Map<String, dynamic>>> fetchCloudTransactions() async {
     try {
-      final resp = await _dio.get(ApiConstants.getTransactions, options: _authOptions);
+      final resp = await _dio.get(
+        ApiConstants.getTransactions,
+        options: _authOptions,
+      );
       final data = resp.data as Map<String, dynamic>;
       final list = data['transactions'] as List<dynamic>;
       return list.cast<Map<String, dynamic>>();
     } on DioException catch (e) {
       throw NetworkException(
-          message: e.response?.data?['detail'] ?? e.message ?? 'Failed to fetch transactions');
+        message:
+            e.response?.data?['detail'] ??
+            e.message ??
+            'Failed to fetch transactions',
+      );
     }
   }
 
   @override
-  Future<List<String>> pushTransactions(List<Map<String, dynamic>> transactions) async {
+  Future<List<String>> pushTransactions(
+    List<Map<String, dynamic>> transactions,
+  ) async {
     if (transactions.isEmpty) return [];
     try {
       final resp = await _dio.post(
@@ -133,7 +158,11 @@ class SyncRemoteDatasourceImpl implements SyncRemoteDatasource {
       return [];
     } on DioException catch (e) {
       throw NetworkException(
-          message: e.response?.data?['detail'] ?? e.message ?? 'Failed to sync transactions');
+        message:
+            e.response?.data?['detail'] ??
+            e.message ??
+            'Failed to sync transactions',
+      );
     }
   }
 
@@ -153,7 +182,11 @@ class SyncRemoteDatasourceImpl implements SyncRemoteDatasource {
       return ids; // Fallback
     } on DioException catch (e) {
       throw NetworkException(
-          message: e.response?.data?['detail'] ?? e.message ?? 'Failed to delete transactions');
+        message:
+            e.response?.data?['detail'] ??
+            e.message ??
+            'Failed to delete transactions',
+      );
     }
   }
 }

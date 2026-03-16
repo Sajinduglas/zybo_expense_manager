@@ -10,6 +10,7 @@ class SyncResult {
   final int categoriesSynced;
   final int transactionsSynced;
   final int deletionsProcessed;
+  final List<String> errors;
 
   const SyncResult({
     required this.success,
@@ -17,6 +18,7 @@ class SyncResult {
     this.categoriesSynced = 0,
     this.transactionsSynced = 0,
     this.deletionsProcessed = 0,
+    this.errors = const [],
   });
 }
 
@@ -31,10 +33,10 @@ class SyncRepository {
     required CategoryLocalDatasource categoryLocal,
     required TransactionLocalDatasource transactionLocal,
     required SharedPreferences prefs,
-  })  : _remote = remote,
-        _categoryLocal = categoryLocal,
-        _transactionLocal = transactionLocal,
-        _prefs = prefs;
+  }) : _remote = remote,
+       _categoryLocal = categoryLocal,
+       _transactionLocal = transactionLocal,
+       _prefs = prefs;
 
   /// Full sync workflow as specified:
   /// Step A: Cloud Purge (Transactions first, then Categories)
@@ -80,7 +82,9 @@ class SyncRepository {
     try {
       final deletedTxIds = await _transactionLocal.getDeletedIds();
       if (deletedTxIds.isNotEmpty) {
-        final confirmedIds = await _remote.deleteCloudTransactions(deletedTxIds);
+        final confirmedIds = await _remote.deleteCloudTransactions(
+          deletedTxIds,
+        );
         if (confirmedIds.isNotEmpty) {
           await _transactionLocal.permanentlyDelete(confirmedIds);
           deletionsProcessed += confirmedIds.length;
@@ -119,7 +123,9 @@ class SyncRepository {
     await _prefs.setString('last_synced', now);
 
     bool isSuccess = errors.isEmpty;
-    String message = isSuccess ? 'Sync complete' : 'Sync completed with ${errors.length} errors';
+    String message = isSuccess
+        ? 'Sync complete'
+        : 'Sync completed with ${errors.length} errors';
 
     return SyncResult(
       success: true, // We return true to indicate the process finished (partial or full)
@@ -127,6 +133,7 @@ class SyncRepository {
       categoriesSynced: categoriesSynced,
       transactionsSynced: transactionsSynced,
       deletionsProcessed: deletionsProcessed,
+      errors: errors,
     );
   }
 
@@ -140,7 +147,7 @@ class SyncRepository {
     for (var cat in cloudCats) {
       final String catId = cat['category_id'] ?? cat['id'];
       final String catName = cat['name'];
-      
+
       categoryNameToId[catName.toLowerCase()] = catId;
 
       await _categoryLocal.insertCategory({
@@ -154,14 +161,16 @@ class SyncRepository {
     // Double-check local categories in case they exist
     final localCats = await _categoryLocal.getAllCategories();
     for (var local in localCats) {
-      categoryNameToId[(local['name'] as String).toLowerCase()] = local['id'] as String;
+      categoryNameToId[(local['name'] as String).toLowerCase()] =
+          local['id'] as String;
     }
 
     // 2. Fetch Transactions
     final cloudTxs = await _remote.fetchCloudTransactions();
     for (var tx in cloudTxs) {
       final apiCategory = tx['category'] ?? tx['category_id'] ?? '';
-      final localCatId = categoryNameToId[apiCategory.toString().toLowerCase()] ?? apiCategory;
+      final localCatId =
+          categoryNameToId[apiCategory.toString().toLowerCase()] ?? apiCategory;
 
       await _transactionLocal.insertTransaction({
         'id': tx['transaction_id'] ?? tx['id'],
