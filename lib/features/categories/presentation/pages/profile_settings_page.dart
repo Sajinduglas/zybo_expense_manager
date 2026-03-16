@@ -468,7 +468,35 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
             _sectionHeader('CLOUD SYNC'),
             const SizedBox(height: 8),
-            BlocBuilder<SyncBloc, SyncState>(
+            BlocConsumer<SyncBloc, SyncState>(
+              listener: (context, state) {
+                if (state is SyncSuccess) {
+                  final r = state.result;
+                  final total = r.categoriesSynced + r.transactionsSynced + r.deletionsProcessed;
+                  final msg = total == 0
+                      ? 'Nothing to sync — already up to date ✓'
+                      : 'Synced: ${r.categoriesSynced} categor${r.categoriesSynced == 1 ? 'y' : 'ies'}, '
+                        '${r.transactionsSynced} transaction${r.transactionsSynced == 1 ? '' : 's'}, '
+                        '${r.deletionsProcessed} deletion${r.deletionsProcessed == 1 ? '' : 's'}';
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(msg, style: const TextStyle(color: Colors.white)),
+                      backgroundColor: total == 0 ? Colors.grey[800] : Colors.green[700],
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                } else if (state is SyncFailure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Sync failed: ${state.message}', style: const TextStyle(color: Colors.white)),
+                      backgroundColor: Colors.red[700],
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 4),
+                    ),
+                  );
+                }
+              },
               builder: (context, state) {
                 final isSyncing = state is SyncInProgress;
                 return Container(
@@ -484,7 +512,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2E2B9B), // Deep blue from screenshot
+                        color: const Color(0xFF2E2B9B),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(

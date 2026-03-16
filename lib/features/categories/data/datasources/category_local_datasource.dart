@@ -74,13 +74,30 @@ class CategoryLocalDatasourceImpl implements CategoryLocalDatasource {
   Future<List<String>> getDeletedIds() async {
     try {
       final db = await _dbHelper.database;
+      // Only return IDs for categories that were previously synced to the server.
+      // Categories with is_synced=0 were never pushed up, so no cloud deletion needed.
       final result = await db.query(
         DbConstants.tableCategories,
         columns: [DbConstants.colId],
-        where: '${DbConstants.colIsDeleted} = ?',
-        whereArgs: [1],
+        where: '${DbConstants.colIsDeleted} = ? AND ${DbConstants.colIsSynced} = ?',
+        whereArgs: [1, 1],
       );
       return result.map((row) => row[DbConstants.colId] as String).toList();
+    } catch (e) {
+      throw CacheException();
+    }
+  }
+
+  /// Permanently removes locally-created (never synced) soft-deleted categories.
+  /// Called during sync to clean up orphan records that don't exist on the server.
+  Future<void> purgeUnsyncedDeleted() async {
+    try {
+      final db = await _dbHelper.database;
+      await db.delete(
+        DbConstants.tableCategories,
+        where: '${DbConstants.colIsDeleted} = ? AND ${DbConstants.colIsSynced} = ?',
+        whereArgs: [1, 0],
+      );
     } catch (e) {
       throw CacheException();
     }
