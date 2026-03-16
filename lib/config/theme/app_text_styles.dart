@@ -168,8 +168,15 @@ class AppTextStyles {
   static const TextStyle profileNickname = TextStyle(
     fontFamily: fontFamily,
     fontWeight: FontWeight.w600,
+    fontSize: 16.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle profileSectionTitle = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w600,
     fontSize: 20.0,
-    color: AppColors.profileNicknameText,
+    color: AppColors.white,
   );
 
   static const TextStyle profileSectionLabel = TextStyle(
@@ -196,6 +203,20 @@ class AppTextStyles {
   static const TextStyle profileLimitAmount = TextStyle(
     fontFamily: fontFamily,
     fontWeight: FontWeight.w600,
+    fontSize: 16.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle profileHint600 = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w600,
+    fontSize: 15.0,
+    color: AppColors.profileNicknameText,
+  );
+
+  static const TextStyle profileItemName = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w500,
     fontSize: 16.0,
     color: AppColors.white,
   );
