@@ -92,4 +92,47 @@ class AppTextStyles {
     fontSize: 16.0,
     color: AppColors.white,
   );
+
+  // Home Screen Styles
+  static const TextStyle homeWelcome = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w600,
+    fontSize: 20.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle homeCardTitle = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w400,
+    fontSize: 13.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle homeCardAmount = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w600,
+    fontSize: 20.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle homeSectionTitle = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w500,
+    fontSize: 16.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle homeLimitLabel = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w400,
+    fontSize: 13.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle homeLimitAmount = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w600,
+    fontSize: 16.0,
+    color: AppColors.white,
+  );
 }

@@ -20,7 +20,12 @@ class AppColors {
 
   static const Color onboardingBlue = Color(0xFF3B38D0);
   static const Color authBackground = Color(0xFF141414);
+  static const Color scafoldBackground = Color(0xFF121212);
   static const Color authFieldBackground = Color(0xFF2A2A2A);
   static const Color success = Color(0xFF34FF4C);
   static const Color disabledButton = Color(0xFF262626);
+  static const Color darkSurface = Color(0xFF1E1E1E);
+  static const Color green = Color(0xFF4CAF50);
+  static const Color incomeGreen = Color(0xFF0F8300);
+  static const Color expenseRed = Color(0xFFB50303);
 }

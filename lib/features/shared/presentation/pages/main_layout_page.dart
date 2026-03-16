@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:zybo_expense_manager/config/theme/app_colors.dart';
+
 import '../../../home/presentation/pages/home_page.dart';
 import '../../../categories/presentation/pages/profile_settings_page.dart';
 import '../../../transactions/presentation/pages/add_transaction_sheet.dart';
@@ -14,14 +17,14 @@ class MainLayoutPage extends StatefulWidget {
 class _MainLayoutPageState extends State<MainLayoutPage> {
   int _currentIndex = 0;
 
-  static const Color _background = Color(0xFF141414);
-  static const Color _activeBlue = Color(0xFF3B38D0);
-  static const Color _navBg = Color(0xFF1E1E1E);
+  static const Color _activeBlue = AppColors.blue;
+  static const Color _navBg = AppColors.darkSurface;
+  static const Color _background = AppColors.scafoldBackground;
 
   // Pages
   final List<Widget> _pages = const [
-    HomePage(),          // index 0 – Home / Dashboard
-    TransactionsPage(),  // index 1 – All Transactions
+    HomePage(), // index 0 – Home / Dashboard
+    TransactionsPage(), // index 1 – All Transactions
     ProfileSettingsPage(), // index 2 – Profile & Settings
   ];
 
@@ -29,18 +32,15 @@ class _MainLayoutPageState extends State<MainLayoutPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _background,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
 
       // FAB only on Home tab
       floatingActionButton: _currentIndex == 0
           ? FloatingActionButton(
               onPressed: () => AddTransactionSheet.show(context),
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor:Color(0xFF20DE39),
               shape: const CircleBorder(),
-              child: const Icon(Icons.add, color: Colors.white, size: 28),
+              child: const Icon(Icons.add, color: AppColors.white, size: 28),
             )
           : null,
 
@@ -59,9 +59,9 @@ class _MainLayoutPageState extends State<MainLayoutPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _navItem(0, Icons.pie_chart, Icons.pie_chart_outline),
-                _navItem(1, Icons.sync, Icons.sync),
-                _navItem(2, Icons.settings, Icons.settings_outlined),
+                _navItem(0, 'bottom_nav_1'),
+                _navItem(1, 'bottom_nav_2'),
+                _navItem(2, 'bottom_nav_3'),
               ],
             ),
           ),
@@ -70,7 +70,20 @@ class _MainLayoutPageState extends State<MainLayoutPage> {
     );
   }
 
-  Widget _navItem(int index, IconData activeIcon, IconData inactiveIcon) {
+  Widget _svgIcon(
+    String assetName, {
+    Color color = AppColors.white,
+    double size = 22,
+  }) {
+    return SvgPicture.asset(
+      'assets/icons/$assetName.svg',
+      width: size,
+      height: size,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+    );
+  }
+
+  Widget _navItem(int index, String svgName) {
     final isActive = _currentIndex == index;
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
@@ -87,10 +100,14 @@ class _MainLayoutPageState extends State<MainLayoutPage> {
               color: isActive ? _activeBlue : Colors.transparent,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              isActive ? activeIcon : inactiveIcon,
-              color: isActive ? Colors.white : Colors.white54,
-              size: 24,
+            child: Center(
+              child: _svgIcon(
+                svgName,
+                color: isActive
+                    ? AppColors.white
+                    : AppColors.white.withValues(alpha: 0.5),
+                size: 20,
+              ),
             ),
           ),
         ),

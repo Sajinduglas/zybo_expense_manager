@@ -7,6 +7,8 @@ import '../../../transactions/presentation/bloc/transaction_bloc.dart';
 import '../../../transactions/presentation/bloc/transaction_state.dart';
 import '../../../transactions/presentation/bloc/transaction_event.dart';
 import '../../../shared/presentation/widgets/app_shimmers.dart';
+import '../../../../config/theme/app_colors.dart';
+import '../../../../config/theme/app_text_styles.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -67,11 +69,7 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Text(
                   '👋 Welcome, $nickname!',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTextStyles.homeWelcome,
                 ),
               ),
 
@@ -81,25 +79,25 @@ class _HomePageState extends State<HomePage> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: isLoading 
-                        ? const BalanceCardShimmer()
-                        : _balanceCard(
-                          title: 'Total Income',
-                          amount: income,
-                          color: const Color(0xFF165A15),
-                          icon: Icons.arrow_downward,
-                        ),
+                      child: isLoading
+                          ? const BalanceCardShimmer()
+                          : _balanceCard(
+                              title: 'Total Income',
+                              amount: income,
+                              color: AppColors.incomeGreen,
+                              icon: Icons.arrow_downward,
+                            ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
                       child: isLoading
-                        ? const BalanceCardShimmer()
-                        : _balanceCard(
-                          title: 'Total Expense',
-                          amount: expense,
-                          color: const Color(0xFF8B0000),
-                          icon: Icons.arrow_upward,
-                        ),
+                          ? const BalanceCardShimmer()
+                          : _balanceCard(
+                              title: 'Total Expense',
+                              amount: expense,
+                              color: AppColors.expenseRed,
+                              icon: Icons.arrow_upward,
+                            ),
                     ),
                   ],
                 ),
@@ -130,21 +128,16 @@ class _HomePageState extends State<HomePage> {
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'MONTHLY LIMIT',
-                            style: TextStyle(
-                                color: Color(0xFF888888),
-                                fontSize: 11,
-                                letterSpacing: 1.2,
-                                fontWeight: FontWeight.w600),
+                            style: AppTextStyles.homeLimitLabel.copyWith(
+                              color: AppColors.white.withValues(alpha: 0.7),
+                            ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 10),
                           Text(
                             '₹${expense.toStringAsFixed(0)} / ₹${monthlyLimit.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold),
+                            style: AppTextStyles.homeLimitAmount,
                           ),
                           const SizedBox(height: 10),
                           ClipRRect(
@@ -161,7 +154,9 @@ class _HomePageState extends State<HomePage> {
                           const SizedBox(height: 6),
                           Text(
                             '$remaining% Remaining',
-                            style: const TextStyle(color: Color(0xFF888888), fontSize: 12),
+                            style: AppTextStyles.homeLimitLabel.copyWith(
+                              color: AppColors.white.withValues(alpha: 0.6),
+                            ),
                           ),
                         ],
                       ),
@@ -174,7 +169,7 @@ class _HomePageState extends State<HomePage> {
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'Recent Transactions',
-                  style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+                  style: AppTextStyles.homeSectionTitle,
                 ),
               ),
               const SizedBox(height: 12),
@@ -313,27 +308,31 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            color,
+            AppColors.black,
+          ],
+        ),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: const TextStyle(color: Colors.white70, fontSize: 12)),
-          const SizedBox(height: 8),
+          Text(title, style: AppTextStyles.homeCardTitle),
+          const SizedBox(height: 12),
           Row(
             children: [
-              Icon(icon, color: Colors.white, size: 16),
-              const SizedBox(width: 4),
+              Icon(icon, color: AppColors.white, size: 18),
+              const SizedBox(width: 6),
               Flexible(
                 child: Text(
                   '₹${amount.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold),
+                  style: AppTextStyles.homeCardAmount,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
