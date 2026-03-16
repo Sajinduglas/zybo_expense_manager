@@ -523,14 +523,14 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             const SizedBox(height: 16),
 
             // ── LOGOUT ───────────────────────────────────────────────────────
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.profileNicknameBg,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.profileBorder),
-              ),
-              child: GestureDetector(
-                onTap: _logout,
+            GestureDetector(
+              onTap: _logout,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.profileNicknameBg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.profileBorder),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Row(
