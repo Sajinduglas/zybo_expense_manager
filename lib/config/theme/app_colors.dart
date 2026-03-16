@@ -28,4 +28,8 @@ class AppColors {
   static const Color green = Color(0xFF4CAF50);
   static const Color incomeGreen = Color(0xFF0F8300);
   static const Color expenseRed = Color(0xFFB50303);
+  static const Color transactionListMuted = Color(0xFF8C8C8C);
+  static const Color creditGreen = Color(0xFF34FF4F);
+  static const Color debitRed = Color(0xFFFF3437);
+  static const Color deleteRed = Color(0xFFE50000);
 }

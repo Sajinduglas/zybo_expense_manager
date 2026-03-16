@@ -135,4 +135,32 @@ class AppTextStyles {
     fontSize: 16.0,
     color: AppColors.white,
   );
+
+  // Transaction List Styles
+  static const TextStyle txName = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w600,
+    fontSize: 16.0,
+    color: AppColors.white,
+  );
+
+  static const TextStyle txCategory = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w400,
+    fontSize: 14.0,
+    color: AppColors.transactionListMuted,
+  );
+
+  static const TextStyle txDate = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w400,
+    fontSize: 13.0,
+    color: AppColors.transactionListMuted,
+  );
+
+  static const TextStyle txAmount = TextStyle(
+    fontFamily: fontFamily,
+    fontWeight: FontWeight.w500,
+    fontSize: 22.0,
+  );
 }

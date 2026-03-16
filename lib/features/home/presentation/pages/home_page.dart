@@ -240,16 +240,13 @@ class _HomePageState extends State<HomePage> {
                                     children: [
                                       Text(
                                         tx.note,
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600),
+                                        style: AppTextStyles.txName,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
                                         tx.categoryName ?? 'Uncategorized',
-                                        style: const TextStyle(color: Colors.white54, fontSize: 12),
+                                        style: AppTextStyles.txCategory,
                                       ),
                                     ],
                                   ),
@@ -262,15 +259,15 @@ class _HomePageState extends State<HomePage> {
                                   children: [
                                     Text(
                                       _formatDate(tx.timestamp),
-                                      style: const TextStyle(color: Colors.white38, fontSize: 11),
+                                      style: AppTextStyles.txDate,
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       '${isCredit ? '+' : '-'}₹${tx.amount.toStringAsFixed(0)}',
-                                      style: TextStyle(
-                                        color: isCredit ? const Color(0xFF4CAF50) : Colors.red,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                                      style: AppTextStyles.txAmount.copyWith(
+                                        color: isCredit
+                                            ? AppColors.creditGreen
+                                            : AppColors.debitRed,
                                       ),
                                     ),
                                   ],
@@ -279,7 +276,7 @@ class _HomePageState extends State<HomePage> {
                                 // Delete
                                 GestureDetector(
                                   onTap: () => context.read<TransactionBloc>().add(DeleteTransactionEvent(tx.id)),
-                                  child: const Icon(Icons.delete, color: Colors.red, size: 20),
+                                  child: const Icon(Icons.delete, color: AppColors.deleteRed, size: 22),
                                 ),
                               ],
                             ),
